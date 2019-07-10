@@ -134,17 +134,6 @@
 	</div>
 </div>
 
-<!-- include summernote css/js-->
-<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
-<script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
-<script src="lang/summernote-ko-KR.js"></script>
 
-<h2>summernote</h2>
-<div id="summernote" class="container-fluid bg-grey slideanim"><p>Hello Summernote</p></div>
-  <script>
-    $(document).ready(function() {
-        $('#summernote').summernote();
-    });
-  </script>
 
 <%@ include file="./footer.jsp"%>

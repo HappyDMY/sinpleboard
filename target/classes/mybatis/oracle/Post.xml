@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 실행할 SQL 문을 정의 해 놓은 파일 -->
+
+<!-- namespace를 필수로 지정해야함 -->
+<mapper namespace="com.semipject.board.post.PostMapper">
+
+	<!-- resultMap -->
+
+
+	<!-- SQL -->
+	<!-- 플래너 추가 -->
+	<insert id="insert"
+		parameterType="com.semipject.board.post.PostDTO">
+		<!-- 일련번호 생성 -->
+		
+		<![CDATA[ 
+		insert into SJ_BOARD(postno, category, title, userid, content, file_names, regdate) 
+		values(sj_board_seq.NEXTVAL, #{category}, #{title}, #{userid}, #{content}, #{file_names}, sysdate) 
+		]]>
+	</insert>
+
+	<select id="postList"
+		resultType="com.semipject.board.post.PostDTO"
+		parameterType="com.semipject.board.post.PostDTO">
+		<![CDATA[
+		SELECT * 		
+		FROM SJ_BOARD
+		WHERE 1=1
+		]]>
+	</select>
+
+	<select id="searchlist"
+		resultType="com.semipject.board.post.PostDTO" parameterType="map">
+		<![CDATA[
+		SELECT * FROM SJ_BOARD
+		WHERE 
+			category like '%'||#{category}||'%'
+		ORDER BY REGDATE DESC
+		]]>
+	</select>
+	
+	
+	
+	<select id="detail" resultType="com.semipject.board.post.PostDTO" parameterType="com.semipject.board.post.PostDTO">
+		<![CDATA[
+		SELECT * FROM SJ_BOARD
+		WHERE postno = #{postno}
+		]]>
+		
+	</select>
+	<!-- <select id="findActiveBlogLike" resultType="Blog"> SELECT * FROM BLOG 
+		WHERE state = ‘ACTIVE’ <if test="title != null"> AND title like #{title} 
+		</if> <if test="author != null and author.name != null"> AND author_name 
+		like #{author.name} </if> </select> -->
+
+</mapper>
+ 
