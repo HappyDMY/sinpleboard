@@ -1,9 +1,17 @@
 <%@page import="org.springframework.web.context.request.SessionScope"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ page session="false"%>
+<%
+ String session_userid = (String) request.getAttribute("session_userid");
+ System.out.println("----jsp---- session_userid = "+ session_userid);
+
+ 
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -83,7 +91,7 @@
 				userid : userid,
 				userpw : userpw
 			},
-			dataType : "text",
+			dataType : "json",
 			async: false,
 			success : function(result) {
 				console.log(result)
@@ -103,7 +111,11 @@
 		}); */
 		f.children("#userpw").val(userpw);
 		f.submit();
-		alert("일단 전송은 함")
+		//alert("일단 전송은 함")
+	}
+
+	function logout(){
+		window.location.href = "${pageContext.request.contextPath}/logout.do";
 	}
 </script>
 <title>semiproject</title>
@@ -390,6 +402,11 @@ translateY
 	background-color: #a3aaff;
 	text-size-adjust: unset;
 }
+#logout {
+	text-decoration: underline;
+	background-color: #a3aaff;
+	text-size-adjust: unset;
+}
 
 div.modal.fade {
 	margin: 15% auto;
@@ -422,7 +439,7 @@ div.modal.fade {
 					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="home.do">신나는 플랫폼</a>
+				<a class="navbar-brand" href="${pageContext.request.contextPath}/home.do">신나는 플랫폼</a>
 			</div>
 			<div class="collapse navbar-collapse" id="myNavbar">
 				<ul class="nav navbar-nav navbar-right">
@@ -431,10 +448,10 @@ div.modal.fade {
 					<li><a href="#services">SERVICES</a></li>
 					<li><a href="#pricing">PRICING</a></li>
 				 -->
-					<li><a href="postlist.do">RECOURCES</a></li>
+					<li><a href="${pageContext.request.contextPath}/postlist.do">RECOURCES</a></li>
 					<li><a href="#contact">CONTACT</a></li>
 					<c:choose>
-						<c:when test="${empty sessionScope.session_userid}">
+						<c:when test="${empty session_userid}">
 							<!-- 비회원 -->
 							<li><a data-toggle="modal" href="#loginModal" id="login"
 								onclick="closeother(this)">LOGIN</a></li>
@@ -443,7 +460,7 @@ div.modal.fade {
 						</c:when>
 						<c:otherwise>
 							<!-- 회원 -->
-							<li><a href="member/logout.do" id="logout">LOGOUT</a></li>
+							<li><a href="${pageContext.request.contextPath}/logout.do" id="logout">LOGOUT</a></li>
 						</c:otherwise>
 					</c:choose>
 				</ul>
@@ -467,15 +484,14 @@ div.modal.fade {
 					<h5 class="modal-title" id="exampleModalLabel">Login</h5>
 				</div>
 				<div class="modal-body">
-					<form class="form-1" id="form-1" action="member/login.do" method="post" name="dto" >
+					<form class="form-1" id="form-1" action="${pageContext.request.contextPath}/login.do" method="post" name="dto" >
 						<span class="inputA">ID</span><br> <input type="text"
 							id="userid" name="userid" /><br> <span class="inputA">Password</span><br>
 						<input type="password" id="userpw" name="userpw" /><br>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" id="loginsubmit"
-						onclick="loginProc()">Submit</button>
+					<button type="button" class="btn btn-primary" id="loginsubmit" onclick="loginProc()">Submit</button>
 					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 				</div>
 			</div>

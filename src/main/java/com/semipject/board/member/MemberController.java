@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,7 +16,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 
 @Controller
-@SessionAttributes({"session_userid"})
+@SessionAttributes({"session_userid","session_usergrade"})
 public class MemberController {
 	
 	@Autowired
@@ -31,73 +30,88 @@ public class MemberController {
 	/*
 	@RequestMapping(value="[요청명령어]", method=RequestMethod.[GET|POST], produces="text/plain; charset='UTF-8'")
 	 */
-	
+	/*
 	
 	// (ajax 통신)
 	@ResponseBody
 	@RequestMapping(value="member/login.ajax", method=RequestMethod.POST)
-	public String calendarAdd(MemberDTO dto, Model model, HttpSession session) {
+	public String calendarAdd(MemberDTO dto, Model model, HttpServletRequest req, HttpServletResponse res) {
 		
 		String result = dao.login(dto);//로그인 result는 userid or fale
 		System.out.println("로그인 result = "+result);
 		System.out.println("member/login.ajax 호출됨 ");
+		HttpSession session = req.getSession();
 		
 		if (result!="fale") {
+			if (session.getAttribute("session_userid")==null) {
+				
+			}
 			
 			session.setAttribute("session_userid", result);		
 			
 			System.out.println("session_userid = "+session.getAttribute("session_userid"));
 		}
 		
+
+		System.out.println("session.getAttribute('session_userid')="+session.getAttribute("session_userid"));
 		// 조회된 정보를 sessionVO에 등록한다.
 
 		
 		return result;
 	}// calendarAdd() end
+	*/
 	
-	
-	@RequestMapping(value="member/login.do", method=RequestMethod.POST)
-	public ModelAndView login(MemberDTO dto, HttpServletRequest req, HttpServletResponse res) {
+	@RequestMapping(value="login.do", method=RequestMethod.POST)
+	public String login(MemberDTO dto, Model model, HttpServletRequest req, HttpServletResponse res)throws Throwable {
+		String userid = dto.getUserid();
+		String userpw = dto.getUserpw();
+
+		userpw = userpw.replace("<", "&lt;");
+		userpw = userpw.replace("<", "&gt;");
 		
+		userid = userid.replace("<", "&lt;");
+		userid = userid.replace("<", "&gt;");
+		// *공백문자 처리  
+		userpw = userpw.replace("  ",	"&nbsp;&nbsp;");
+		userid = userid.replace("  ",	"&nbsp;&nbsp;");
+		// *줄바꿈 문자처리
+		userid = userid.replace("\n", "<br>");
+		userpw = userpw.replace("\n", "<br>");
 		System.out.println(dto.getUserid());
 		System.out.println(dto.getUserpw());
 
-		String result = dao.login(dto);//로그인 result는 userid or fale
-		System.out.println("로그인 result = "+result);		
+		String session_userid = dao.login(dto);//로그인 result는 userid or fale
+		
+		System.out.println("로그인 result = "+session_userid);		
 		System.out.println("member/login.do 호출됨");
+		/*HttpSession session = req.getSession();
 		
-		HttpSession session = null;
-		if (result!="fale") {
-			session= req.getSession();
-			session.setAttribute("session_userid", result);
+		if (!session_userid.equals("fale")) {
+			session.setAttribute("session_userid", session_userid);
 		}
-		session= req.getSession();
-		session.setAttribute("session_userid", result);
-		
+		session.setAttribute("session_userid", session_userid);
 		// 조회된 정보를 sessionVO에 등록한다.
 		
-		System.out.println(session.getAttribute("session_userid"));
-
-		ModelAndView mav=new ModelAndView("index");	
-		mav.addObject("session_userid", session);
+		System.out.println("session.getAttribute('session_userid')="+session.getAttribute("session_userid"));
+		*/ 
 		
-		return mav;
+		
+		// model.addAttribute 로 세션 생성 어노테이션이 세션으로 저장해줌
+		// @SessionAttributes({"session_userid","session_usergrade"})
+		model.addAttribute("session_userid", session_userid);
+
+//		ModelAndView mav=new ModelAndView("index");	
+		
+		return "index";
 	} // logout() end	
 	
 	
-	@RequestMapping(value="member/logout.do", method=RequestMethod.POST)
-	public ModelAndView logout(MemberDTO dto, SessionStatus status, HttpServletRequest request) {
+	@RequestMapping(value="logout.do", method=RequestMethod.GET)
+	public ModelAndView logout(MemberDTO dto, Model model, SessionStatus status, HttpServletRequest request) {
 		
 		//세션지우기
 		status.setComplete();//세션 지우기
-		
-		String url = request.getHeader("referer"); //이전페이지 URL 가져옴
-		int start = url.lastIndexOf("/planbut/");
-		String addr = url.substring(start); //이전페이지(명령어만 뽑기)
-		
-		RedirectView rv = new RedirectView(addr);
-		rv.setExposeModelAttributes(false);
-		ModelAndView mav=new ModelAndView(rv);		
+		ModelAndView mav=new ModelAndView("redirect:/home.do");		
 		
 		return mav;
 	} // logout() end	

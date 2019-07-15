@@ -5,12 +5,77 @@
 
 <!-- namespace를 필수로 지정해야함 -->
 <mapper namespace="com.semipject.board.post.PostMapper">
-
-	<!-- resultMap -->
-
-
+	
+	
+	<select id="listAll" resultType="com.semipject.board.post.PostDTO">
+		
+		<!-- 페이징 -->
+		<include refid="pagingHeader"></include>
+			SELECT 
+				ROWNUM,postno,CATEGORY, TITLE, CONTENT,USERID,VIEWS,FILE_NAMES, REGDATE 
+			FROM 
+				SJ_BOARD
+			<!-- 검색조건 -->
+			<include refid="search"></include>
+			ORDER BY regdate DESC, postno DESC
+		<!-- 페이징 -->
+		<include refid="pagingFooter"></include>	
+	</select>
+	
+	<!-- 02_02. 게시글 레코드 갯수 -->
+	<select id="countListContent" resultType="int">
+		SELECT COUNT(*) 
+			FROM 
+				SJ_BOARD
+		<!-- WHERE절을 include 태그로 삽입 -->
+		<include refid="search"></include>
+	</select>
 	<!-- SQL -->
-	<!-- 플래너 추가 -->
+	<sql id="search">
+		<choose>
+			<!-- 검색옵션이 전체 검색일 경우 --><!-- 
+			<when test="searchOption=='all'">
+				WHERE 
+					
+					(userid like '%'||#{keyword}||'%'
+				OR 
+					content like '%'||#{keyword}||'%'
+				OR 
+					title like '%'||#{keyword}||'%')
+			</when>
+			전체 검색이 아닐 경우
+			<otherwise>
+				WHERE 
+					${searchOption} like '%'||#{keyword}||'%'
+			</otherwise> -->
+			<when test="searchOption=='all'">
+				WHERE 
+					
+					(userid like '%'||#{keyword}||'%'
+				OR 
+					content like '%'||#{keyword}||'%'
+				OR 
+					title like '%'||#{keyword}||'%')
+			</when>
+			<otherwise>
+				WHERE 
+					${searchOption} like '%'||#{keyword}||'%'			
+			</otherwise>
+		</choose>
+	</sql>
+	
+	
+	<!-- 페이징 sql -->
+	<sql id="pagingHeader">
+		SELECT * FROM (
+			SELECT ROWNUM AS rn, A.* FROM (
+	</sql>
+	<sql id="pagingFooter">
+			) A
+		) WHERE rn BETWEEN #{start} AND #{end}
+	</sql>
+	
+	
 	<insert id="insert"
 		parameterType="com.semipject.board.post.PostDTO">
 		<!-- 일련번호 생성 -->
@@ -27,7 +92,7 @@
 		<![CDATA[
 		SELECT * 		
 		FROM SJ_BOARD
-		WHERE 1=1
+		ORDER BY REGDATE DESC
 		]]>
 	</select>
 
@@ -50,6 +115,35 @@
 		]]>
 		
 	</select>
+	
+	<delete id="delete" parameterType="com.semipject.board.post.PostDTO">
+		<![CDATA[
+		DELETE FROM SJ_BOARD
+		WHERE postno = #{postno}
+	
+		]]>
+	</delete>
+	
+	<update id="update" parameterType="com.semipject.board.post.PostDTO">
+        <![CDATA[
+        update SJ_BOARD 
+        set 
+        	title=#{title},
+        	content=#{content}
+        where postno=#{postno}
+		]]>
+	
+    </update>
+    
+	<update id="deletefile" parameterType="com.semipject.board.post.PostDTO">
+        <![CDATA[
+        update SJ_BOARD 
+        set 
+        	file_names=#{file_names} 
+        where postno=#{postno}
+		]]>
+	
+    </update>
 	<!-- <select id="findActiveBlogLike" resultType="Blog"> SELECT * FROM BLOG 
 		WHERE state = ‘ACTIVE’ <if test="title != null"> AND title like #{title} 
 		</if> <if test="author != null and author.name != null"> AND author_name 

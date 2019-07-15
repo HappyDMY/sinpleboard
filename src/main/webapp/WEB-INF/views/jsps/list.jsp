@@ -1,11 +1,11 @@
 <%@ include file="../header.jsp"%>
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-
+${msg }
 <div class="container">
 	<h2>자료실</h2>
 	<div class="table-responsive">
 	<div class="pull-right">
-		<form id="searchform" class="form-inline" style="float: rigjt">
+		<form id="searchform" onsubmit="checkforsearch(this)" class="form-inline" style="float: rigjt" action="postlist.do" method="get">
 			<input type="date" class="form-control docs-date" id="startdate"
 				name="startdate" placeholder="Pick a date" style="widows: auto">&nbsp;~&nbsp; 
 			<input type="date" class="form-control docs-date" id="enddate"
@@ -19,16 +19,21 @@
 				<option value="강의자료" >강의자료</option>
 				<option value="기타자료" >기타자료</option>
 			</select>&nbsp;&nbsp;  
-			<select name="writerortitle" id="writerortitle" class="form-control">
-				<option value="choose" selected>선택</option>
+			<select name="searchOption" id="searchOption" class="form-control">
+				<option value="all" selected>선택</option>
 				<option value="title">제목</option>
+				<option value="title">내용</option>
 				<option value="userid">작성자</option>
 			</select> 
-			<input type="text" name="word" id="word" class="form-control">
-			<input type="button" name="search" id="search" class="btn btn-defalt" value="조회">
+			<input type="text" name="keyword" id="keyword" class="form-control">
+			<input type="hidden" name="curPage" id="curPage" value="${map.boardPager.curPage }" class="form-control">
+			<input type="hidden" name="word" id="word" class="form-control">
+			<input type="hidden" name="word" id="word" class="form-control">
+			<input type="submit" name="search" id="searchNAJAX" class="btn btn-defalt" value="조회">
 		</form>
 	</div>
 		<br>
+		<h4>총글수 : ${map.count }</h4>
 		<table id="" class="table table-hover" >
 			<thead>
 				<tr>
@@ -37,25 +42,64 @@
 					<th>제목</th>
 					<th>작성자</th>
 					<th>작성일</th>
-					<th>조회수</th>
-					<th>첨부파일</th>
+					<!-- <th>조회수</th> -->
+					<!-- <th>첨부파일</th> -->
 				</tr>
 			</thead>
 			<tbody id="tbody">
-				<c:forEach var="item" items="${list }" varStatus="status">
+				<c:forEach var="item" items="${map.list }" varStatus="status">
 					<tr class=""  onclick="location.href='postdetail.do?postno=${item.postno}'" style="cursor:pointer;">
-						<td>${fn:length(list)- status.index }</td>
+						<td>${map.count - ((map.boardPager.curPage -1)*10) - status.index }</td>
 						<td>${item.category}</td>
 						<td>${item.title}</td>
 						<td>${item.userid}</td>
 						<td>${item.regdate}</td>
-						<td>${item.views}</td>
-						<td>${item.file_names}</td>
+						<%-- <td>${item.views}</td> --%>
+						<%-- <td>${item.file_names}</td> --%>
 					</tr>
 				</c:forEach>
+				
 			</tbody>
+			
+			<!-- 페이징 -->
+			<tr>
+				<td colspan="5">
+					<!-- 처음페이지로 이동 : 현재 페이지가 1보다 크면  [처음]하이퍼링크를 화면에 출력-->
+					<c:if test="${map.boardPager.curBlock > 1}">
+						<a href="javascript:list('1')">[처음]</a>
+					</c:if>
+					
+					<!-- 이전페이지 블록으로 이동 : 현재 페이지 블럭이 1보다 크면 [이전]하이퍼링크를 화면에 출력 -->
+					<c:if test="${map.boardPager.curBlock > 1}">
+						<a href="javascript:list('${map.boardPager.prevPage}')">[이전]</a>
+					</c:if>
+					
+					<!-- **하나의 블럭 시작페이지부터 끝페이지까지 반복문 실행 -->
+					<c:forEach var="num" begin="${map.boardPager.blockBegin}" end="${map.boardPager.blockEnd}">
+						<!-- 현재페이지이면 하이퍼링크 제거 -->
+						<c:choose>
+							<c:when test="${num == map.boardPager.curPage}">
+								<span style="color: red">${num}</span>&nbsp;
+							</c:when>
+							<c:otherwise>
+								<a href="javascript:list(${num})">${num}</a>&nbsp;
+							</c:otherwise>
+						</c:choose>
+					</c:forEach>
+					
+					<!-- 다음페이지 블록으로 이동 : 현재 페이지 블럭이 전체 페이지 블럭보다 작거나 같으면 [다음]하이퍼링크를 화면에 출력 -->
+					<c:if test="${map.boardPager.curBlock <= map.boardPager.totBlock}">
+						<a href="javascript:list(${map.boardPager.nextPage})">[다음]</a>
+					</c:if>
+					
+					<!-- 끝페이지로 이동 : 현재 페이지가 전체 페이지보다 작거나 같으면 [끝]하이퍼링크를 화면에 출력 -->
+					<c:if test="${map.boardPager.curPage <= map.boardPager.totPage}">
+						<a href="javascript:list(${map.boardPager.totPage})">[끝]</a>
+					</c:if>
+				</td>
+			</tr>
+			<!-- 페이징 -->
 		</table>
-		<div class="">$.parseHTML(${paging })</div>
 
 	</div>
 	<div style="margin: auto">
@@ -65,6 +109,20 @@
 
 <script type="text/javascript">
 
+/* 
+function checkforsearch(f){
+	var form = $('#searchform');
+	
+	alert(form.find("#category option:selected").val());
+	alert(form.find("#searchOption option:selected").val());
+	return false;
+	}
+	
+}
+
+ */
+
+
 $(document).ready(function(){
 	$('#search').on('click', function(){
 		//concol.log(form);
@@ -73,7 +131,7 @@ $(document).ready(function(){
 		var $startdate = form.children("#startdate").val();
 		var $enddate = form.children("#enddate").val();
 		var $category = form.find("#category option:selected").val();//선택안되어있으면 undefind?
-		var $writerortitle = form.find("#writerortitle option:selected").val();
+		var $searchOption = form.find("#writerortitle option:selected").val();
 		var $word = form.children("#word").val();
 
 		console.log($startdate);
@@ -83,7 +141,7 @@ $(document).ready(function(){
 		console.log($word);
 		//alert($word=='')
 
-		if (($writerortitle=='choose')&&($word!='')) {
+		if (($searchOption=='choose')&&($word!='')) {
 			alert("검색 대상을 선택해주세요");
 			$("#writerortitle").focus();
 			return false;
@@ -132,6 +190,21 @@ function searchedlist(datas){
 	var posts = new Array();//polyline 그릴 좌표 배열
 	/* 
 	<c:forEach var="post" items="${datas }">//마커찍을 전체 도시들 정보 Array에 저장
+
+	$("<tr/>", {
+	    "class": "tr",
+	    html: [ 
+			$("<td/>", { html: post.postno, }),
+			$("<td/>", { html: post.category, }),
+			$("<td/>", { html: post.title, }),
+			$("<td/>", { html: post.userid, }),
+			$("<td/>", { html: post.regdate, }),
+			$("<td/>", { html: post.p_code, })
+	    ]
+	}).appendTo("#tbody");
+		
+
+	
 	var cityDTO = new Object();
 	post.category = "${post.ct_name}";
 	post.title = "${post.ct_code}";
@@ -143,18 +216,7 @@ function searchedlist(datas){
 	posts.push(post);
 	</c:forEach> */
 	
-	$("<tr/>", {
-	    "class": "tr",
-	    html: [ 
-			$("<td/>", { html: p_code, }),
-			$("<td/>", { html: p_code, }),
-			$("<td/>", { html: p_code, }),
-			$("<td/>", { html: p_code, }),
-			$("<td/>", { html: p_code, }),
-			$("<td/>", { html: p_code, }),
-	    ]
-	}).appendTo(".sub-menu .csp-list");
-		
+	
  	/* $("<li/>", {
 			    "class": "root list-group-item",
 			    html: [ 
@@ -170,5 +232,15 @@ function searchedlist(datas){
 			}).appendTo(".sub-menu .csp-list"); */
 }
 /* 페이징 시작~~~ */
+
+
+
+
+
+
+	// 원하는 페이지로 이동시 검색조건, 키워드 값을 유지하기 위해 
+function list(page){
+	location.href="${pageContext.request.contextPath}/postlist.do?curPage="+page+"&searchOption=${map.searchOption}"+"&keyword=${map.keyword}";
+}
 </script>
 <%@ include file="../footer.jsp"%>

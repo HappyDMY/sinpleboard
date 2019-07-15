@@ -1,4 +1,5 @@
 <%@ include file="../header.jsp"%>
+<%@ include file="../sessionCheck.jsp"%>
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 
 
@@ -10,7 +11,8 @@
 
 <h2>글쓰기</h2>
 
-<form action="postinsert.do" method="POST" class="form" onsubmit=""  enctype="multipart/form-data" >
+<form action="postinsert.do" method="POST" onsubmit="insertcheck()" class="form" id="insform"  enctype="multipart/form-data" >
+	<input type="hidden" name="userid" id="userid" value="${session_userid }"/>
 	<table class="table" table-responsive>
 		<tr>
 			<th>제목</th>
@@ -29,8 +31,8 @@
 	</table>
 	<textarea id="content" name="content"></textarea>
 	<input multiple="multiple" type="file" class="btn btn-default right" name="file" id="file">
-	
-	<input type="submit" value="저장" class="btn btn-default right"> <input type="button"value="목록" class="btn btn-default" onclick="location.href='postlist.do'">
+	<input type="submit" value="저장" class="btn btn-default">
+	<input type="button"value="목록" class="btn btn-default" onclick="location.href='postlist.do'">
 </form>
 
 <script>
@@ -45,28 +47,26 @@
 	});
 
 
-	function fileCheck(f) {
-		//포토 갤러리 유효성 검사
-		//1) 이름
-		
-		//2) 제목
-		
-		//3) 비밀번호
-		
-		//4) 첨부파일
-		//문) 첨부파일의 확장명을 출력하시오
-		//		예) png, gif, jpg
 
-		var filename = f.filename.value.trim();	
-		if (filename.length<5) {
-			alert("첨부파일을 선택하세요");
-			return false;
-		}
-		var i = f.filename.value.lastIndexOf(".");
-		var extention = filename.substring(i);
+	function insertcheck(){
+		//alert($("#title").val()==null);
+		//alert($("#content").val()); 
 		
-		extention.toLowerCase();// 소문자로 변환하는 함수
-	}//fileCheck end
+
+		if ($("#title").val()==null) {
+			aler("제목을 입력하세요");
+			return false;
+
+			if ($("#content").val()==null) {
+				aler("내용을 입력하세요");
+				return false;
+			}
+		}else {
+			return true;
+			
+		}
+	}
+
 </script>
 
 

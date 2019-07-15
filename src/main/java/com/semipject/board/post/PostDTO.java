@@ -1,5 +1,7 @@
 package com.semipject.board.post;
 
+import org.json.simple.JSONArray;
+
 public class PostDTO {
 	private int postno;//"POSTNO" NUMBER NOT NULL ENABLE, 
 	private String category;//"CATEGORY" VARCHAR2(30) NOT NULL ENABLE, 
@@ -69,13 +71,6 @@ public class PostDTO {
 		this.views = views;
 	}
 
-	public String getFile_names() {
-		return file_names;
-	}
-
-	public void setFile_names(String file_names) {
-		this.file_names = file_names;
-	}
 
 	public String getDeleted() {
 		return deleted;
@@ -85,6 +80,13 @@ public class PostDTO {
 		this.deleted = deleted;
 	}
 
+	public String getFile_names() {
+		return file_names;
+	}
+
+	public void setFile_names(String file_names) {
+		this.file_names = file_names;
+	}
 
 
 }
